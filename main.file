@@ -1,0 +1,89 @@
+#include <iostream>
+#include <map>
+#include <string>
+#include <fstream>
+
+using namespace std;
+
+const string FILENAME = "users.txt";
+
+// Function prototypes
+void saveUsersToFile(const map<string, string>& users);
+void loadUsersFromFile(map<string, string>& users);
+void addNewUser(map<string, string>& users);
+bool authenticateUser(const map<string, string>& users, const string& id, const string& password);
+
+int main() {
+    map<string, string> users;
+
+    // Load existing users from file
+    loadUsersFromFile(users);
+
+    int choice;
+    cout << "1. Login\n2. Register\nEnter your choice: ";
+    cin >> choice;
+
+    if (choice == 1) {
+        string id, password;
+        cout << "Enter your ID: ";
+        cin >> id;
+        cout << "Enter your password: ";
+        cin >> password;
+
+        if (authenticateUser(users, id, password)) {
+            cout << "Authentication successful. Welcome!" << endl;
+        } else {
+            cout << "Authentication failed. Invalid ID or password." << endl;
+        }
+    } else if (choice == 2) {
+        addNewUser(users);
+        saveUsersToFile(users);
+        cout << "New user registered successfully." << endl;
+    } else {
+        cout << "Invalid choice." << endl;
+    }
+
+    return 0;
+}
+
+void saveUsersToFile(const map<string, string>& users) {
+    ofstream outfile(FILENAME);
+    if (outfile.is_open()) {
+        for (const auto& user : users) {
+            outfile << user.first << " " << user.second << endl;
+        }
+        outfile.close();
+    } else {
+        cerr << "Unable to open file for writing." << endl;
+    }
+}
+
+void loadUsersFromFile(map<string, string>& users) {
+    ifstream infile(FILENAME);
+    if (infile.is_open()) {
+        string id, password;
+        while (infile >> id >> password) {
+            users[id] = password;
+        }
+        infile.close();
+    } else {
+        cerr << "No user file found. Starting with an empty user list." << endl;
+    }
+}
+
+void addNewUser(map<string, string>& users) {
+    string id, password;
+    cout << "Enter new user ID: ";
+    cin >> id;
+    cout << "Enter new user password: ";
+    cin >> password;
+    users[id] = password;
+}
+
+bool authenticateUser(const map<string, string>& users, const string& id, const string& password) {
+    auto it = users.find(id);
+    if (it != users.end() && it->second == password) {
+        return true;
+    }
+    return false;
+}
