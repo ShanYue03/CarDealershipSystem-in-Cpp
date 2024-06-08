@@ -1,7 +1,10 @@
-# Car Dealsership System in C++-
+                                                                                       # Car Dealsership System in C++-
 
-this code enables user to register their ID's with password(including symbols), which then saves the data to a txt file named user.txt
-every time the code runs, it will directly take the data from the txt file in the computer for authentication
+Code Scenario and background: You are a software developer at a software development company. One of the largest car dealerships has
+approached your company, requesting a program to manage their business operations. The purpose of this
+system is to streamline tasks related to car brands, customers, billing, and more.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 $${\color{blue}1: Authentication and Menu Display}$$
 •	Task: Implementing the login function and displayMenu.
@@ -9,7 +12,7 @@ $${\color{blue}1: Authentication and Menu Display}$$
 1.	login: Ensure secure access to the system.
 2.	displayMenu: Display available options for various tasks.
 
-2: Car Management
+$${\color{blue}2: Car Management}$$
 •	Task: Adding new cars and modifying car data.
 •	Details:
 1.	addCar: Generate car ID and save car information.
@@ -17,7 +20,7 @@ $${\color{blue}1: Authentication and Menu Display}$$
 	saveCarInfo: Save the car details.
 2.	modifyCarData: Modify existing car details 
 
-3: Display and Sorting
+$${\color{blue}3: Display and Sorting}$$
 •	Task: Displaying and sorting car records.
 •	Details:
 1.	displayAllCars: Display an unsorted list of all car records 
@@ -27,7 +30,7 @@ $${\color{blue}1: Authentication and Menu Display}$$
 	sortByID: Sort cars by ID.
 	sortByBestSellingBrand: Sort best selling cars
  
-4: Searching and Tracking
+$${\color{blue}4: Searching and Tracking}$$
 •	Task: Implementing search functionalities and tracking the number of cars sold.
 •	Details:
 1.	searchCarByID: Implement linear and binary search algorithms 
@@ -38,7 +41,7 @@ $${\color{blue}1: Authentication and Menu Display}$$
 4.	removeCarRecord: Implement functionality to remove a car record 
 5.	Check stock
 
-5: Billing and Reporting
+$${\color{blue}5: Billing and Reporting}$$
 •	Task: Generating bills, searching bills, and generating reports.
 •	Details:
 1.	generateBill: Generate purchase order numbers, calculate total prices, and create bills 
