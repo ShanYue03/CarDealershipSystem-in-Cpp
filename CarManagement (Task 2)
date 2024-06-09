@@ -1,0 +1,99 @@
+#include <iostream>
+#include <vector>
+#include <sstream>
+#include <random>
+using namespace std;
+
+struct Car{
+    string id;
+    string brand;
+    string color;
+    string countryOfManufacture;
+    int yearOfManufacture;
+    double price;
+};
+
+vector<Car> carDatabase;
+
+string generateCarID(const string& brand){
+    string id = brand.substr(0, 3);
+    id += to_string(rand() % 1000000 + 1000000);
+    return id;
+}
+
+void saveCarDatabase() {
+    ofstream outFile("cars.txt");
+    for (const auto& car : carDatabase) {
+        outFile << car.id << ","
+                << car.brand << ","
+                << car.color << ","
+                << car.countryOfManufacture << ","
+                << car.yearOfManufacture << ","
+                << car.price << :endl;
+    }
+    outFile.close();
+}
+
+void addCar(){
+    Car newCar;
+    cout << "Enter car brand: ";
+    cin >> newCar.brand;
+    cout << "Enter car color: ";
+    cin >> newCar.color;
+    cout << "Enter country of manufacture: ";
+    cin >> newCar.countryOfManufacture;
+    cout << "Enter year of manufacture: ";
+    cin >> newCar.yearOfManufacture;
+    cout << "Enter car price: RM";
+    cin >> newCar.price;
+    newCar.id = generateCarID(newCar.brand);
+    carDatabase.push_back(newCar);
+    saveCarDatabase();
+    cout << "Car added successfully with ID: " << newCar.id << endl;
+}
+
+void loadCarDatabase() {
+    ifstream inFile("cars.txt");
+    string line;
+    carDatabase.clear();
+    while (getline(inFile, line)) {
+        istringstream ss(line);
+        Car car;
+        string year, price;
+        getline(ss, car.id, ',');
+        getline(ss, car.brand, ',');
+        getline(ss, car.color, ',');
+        getline(ss, car.countryOfManufacture, ',');
+        getline(ss, year, ',');
+        getline(ss, price, ',');
+        car.yearOfManufacture = stoi(year);
+        car.price = stod(price);
+        carDatabase.push_back(car);
+    }
+    inFile.close();
+}
+
+void modifyCarData(){
+    loadCarDatabase();
+    string carID;
+    cout << "Enter the car ID to modify: ";
+    cin >> carID;
+    for(auto& car : carDatabase){
+        if(car.id == carID){
+            cout << "Enter new car brand: ";
+            cin >> car.brand;
+            cout << "Enter new car color: ";
+            cin >> car.color;
+            cout << "Enter new country of manufacture: ";
+            cin >> car.countryOfManufacture;
+            cout << "Enter new year of manufacture: ";
+            cin >> car.yearOfManufacture;
+            cout << "Enter new car price: RM";
+            cin >> car.price;
+            saveCarDatabase();
+            cout << "Car data updated successfully." << endl;
+            return;
+        }
+    }
+    cout << "Car ID not found." << endl;
+}
