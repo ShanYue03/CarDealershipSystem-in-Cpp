@@ -1,0 +1,228 @@
+#include <iostream>
+#include <map>
+#include <string>
+#include <fstream>
+#include <vector>
+#include <sstream>
+#include <random>
+
+using namespace std;
+
+const string FILENAME = "users.txt";
+
+// Function prototypes
+void saveUsersToFile(const map<string, string>& users);
+void loadUsersFromFile(map<string, string>& users);
+void addNewUser(map<string, string>& users);
+bool authenticateUser(const map<string, string>& users, const string& id, const string& password);
+
+void saveUsersToFile(const map<string, string>& users) {
+    ofstream outfile(FILENAME);
+    if (outfile.is_open()) {
+        for (const auto& user : users) {
+            outfile << user.first << " " << user.second << endl;
+        }
+        outfile.close();
+    } else {
+        cerr << "Unable to open file for writing." << endl;
+    }
+}
+
+void loadUsersFromFile(map<string, string>& users) {
+    ifstream infile(FILENAME);
+    if (infile.is_open()) {
+        string id, password;
+        while (infile >> id >> password) {
+            users[id] = password;
+        }
+        infile.close();
+    } else {
+        cerr << "No user file found. Starting with an empty user list." << endl;
+    }
+}
+
+void addNewUser(map<string, string>& users) {
+    string id, password;
+    cout << "Enter new user ID: ";
+    cin >> id;
+    cout << "Enter new user password: ";
+    cin >> password;
+    users[id] = password;
+}
+
+bool authenticateUser(const map<string, string>& users, const string& id, const string& password) {
+    auto it = users.find(id);
+    if (it != users.end() && it->second == password) {
+        return true;
+    }
+    return false;
+}
+
+struct Car{
+    string id;
+    string brand;
+    string color;
+    string countryOfManufacture;
+    int yearOfManufacture;
+    double price;
+};
+
+vector<Car> carDatabase;
+
+string generateCarID(const string& brand){
+    string id = brand.substr(0, 3);
+    id += to_string(rand() % 1000000 + 1000000);
+    return id;
+}
+
+void saveCarDatabase() {
+    ofstream outFile("cars.txt");
+    for (const auto& car : carDatabase) {
+        outFile << car.id << ","
+                << car.brand << ","
+                << car.color << ","
+                << car.countryOfManufacture << ","
+                << car.yearOfManufacture << ","
+                << car.price << endl;
+    }
+    outFile.close();
+}
+
+void addCar(){
+    Car newCar;
+    cout << "Enter car brand: ";
+    cin >> newCar.brand;
+    cout << "Enter car color: ";
+    cin >> newCar.color;
+    cout << "Enter country of manufacture: ";
+    cin >> newCar.countryOfManufacture;
+    cout << "Enter year of manufacture: ";
+    cin >> newCar.yearOfManufacture;
+    cout << "Enter car price: RM";
+    cin >> newCar.price;
+    newCar.id = generateCarID(newCar.brand);
+    carDatabase.push_back(newCar);
+    saveCarDatabase();
+    cout << "Car added successfully with ID: " << newCar.id << endl;
+}
+
+void loadCarDatabase() {
+    ifstream inFile("cars.txt");
+    string line;
+    carDatabase.clear();
+    while (getline(inFile, line)) {
+        istringstream ss(line);
+        Car car;
+        string year, price;
+        getline(ss, car.id, ',');
+        getline(ss, car.brand, ',');
+        getline(ss, car.color, ',');
+        getline(ss, car.countryOfManufacture, ',');
+        getline(ss, year, ',');
+        getline(ss, price, ',');
+        car.yearOfManufacture = stoi(year);
+        car.price = stod(price);
+        carDatabase.push_back(car);
+    }
+    inFile.close();
+}
+
+void modifyCarData(){
+    loadCarDatabase();
+    string carID;
+    cout << "Enter the car ID to modify: ";
+    cin >> carID;
+    for(auto& car : carDatabase){
+        if(car.id == carID){
+            cout << "Enter new car brand: ";
+            cin >> car.brand;
+            cout << "Enter new car color: ";
+            cin >> car.color;
+            cout << "Enter new country of manufacture: ";
+            cin >> car.countryOfManufacture;
+            cout << "Enter new year of manufacture: ";
+            cin >> car.yearOfManufacture;
+            cout << "Enter new car price: RM";
+            cin >> car.price;
+            saveCarDatabase();
+            cout << "Car data updated successfully." << endl;
+            return;
+        }
+    }
+    cout << "Car ID not found." << endl;
+}
+
+int main() {
+    map<string, string> users;
+
+    // Load existing users from file
+    loadUsersFromFile(users);
+
+    int choice;
+        cout << "----------------------------------" << endl;
+        cout << "\t     Welcome" << endl;
+        cout << "----------------------------------" << endl;
+        cout << "1. Login\n2. Register\nEnter your choice: ";
+        cin >> choice;
+
+    //Login
+    if (choice == 1) {
+
+     bool identified = false;
+     while(identified != true)
+     {
+       string id, password;
+
+        cout << "Enter your ID: ";
+        cin >> id;
+        cout << "Enter your password: ";
+        cin >> password;
+
+        if (authenticateUser(users, id, password)) {
+            cout << "Authentication successful. Welcome!" << endl;
+            identified = true;
+        } else {
+            cout << "\n\033[1m\033[3mAuthentication failed :/ Invalid ID or password.\033[0m" << endl;
+            identified = false;
+        }
+     }
+
+       int menuChoice;
+       {
+            while(menuChoice != 9)
+           {
+                cout << "----------------------------------" << endl;
+                cout << "\t  Option to Choose" << endl;
+                cout << "----------------------------------" << endl;
+                cout << "1. Add a new car\n2. Modify car data\n3. Display all cars\n4. Sort cars by brand or price" << endl;
+                cout << "5. Search for a car by its unique ID\n6. Track the number of cars sold" << endl;
+                cout << "7. Remove a car record\n8. Sort cars by best-selling brand\n9. Exit\nEnter your choice: ";
+
+                cin >> menuChoice;
+
+            /** Implement the function HERE **/
+                switch(menuChoice)
+                {
+                    case 1:
+                        addCar();
+                        break;
+                    case 2:
+                        modifyCarData();
+                        break;
+                }
+           }
+           cout << "\nThankyou and Goodbye!" << endl;
+       }
+    }
+
+    //Register
+    else if (choice == 2) {
+        addNewUser(users);
+        saveUsersToFile(users);
+        cout << "New user registered successfully." << endl;
+    } else {
+        cout << "Invalid choice." << endl;
+    }
+
+    return 0;
+}
