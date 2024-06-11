@@ -17,8 +17,8 @@ $${\color{blue}2: Car Management}$$
 •	Task: Adding new cars and modifying car data.
 •	Details:
 1.	addCar: Generate car ID and save car information.
-	generateCarID: Generate unique car IDs.
-	saveCarInfo: Save the car details.
+-	generateCarID: Generate unique car IDs.
+-	saveCarInfo: Save the car details.
 2.	modifyCarData: Modify existing car details 
 
 $${\color{blue}3: Display and Sorting}$$
