@@ -76,7 +76,8 @@ string generateCarID(const string& brand){
 }
 
 void saveCarDatabase() {
-    ofstream outFile("cars.txt");
+    ofstream outFile("cars.txt", ios::app);
+    if (outFile.is_open()) {
     for (const auto& car : carDatabase) {
         outFile << car.id << ","
                 << car.brand << ","
@@ -86,6 +87,9 @@ void saveCarDatabase() {
                 << car.price << endl;
     }
     outFile.close();
+}   else{
+        cerr << "Unable to open file for writing." << endl;
+     }
 }
 
 void addCar(){
@@ -108,6 +112,7 @@ void addCar(){
 
 void loadCarDatabase() {
     ifstream inFile("cars.txt");
+
     string line;
     carDatabase.clear();
     while (getline(inFile, line)) {
@@ -125,7 +130,8 @@ void loadCarDatabase() {
         carDatabase.push_back(car);
     }
     inFile.close();
-}
+}   
+
 
 void modifyCarData(){
     loadCarDatabase();
