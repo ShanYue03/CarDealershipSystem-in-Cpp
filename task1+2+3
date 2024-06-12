@@ -197,7 +197,7 @@ void sortByPrice() {
 }
 
 void sortByID() {
-    //Display in alphabetical order (A-Z),if the brands are the same, sort in ascending order by considering the last few digits of the ID.
+    //Display in alphabetical order (A-Z),if the brands are the same, sort in ascending order by considering the last few digits of the ID
     loadCarDatabase();
     sort(carDatabase.begin(), carDatabase.end(), compareByID);
     saveCarDatabase();
@@ -205,7 +205,7 @@ void sortByID() {
 }
 
 void sortByBestSellingBrand() {
-    // Shows the best-selling vehicle brands.
+    // Display the number of car brands in descending order
     loadCarDatabase();
     map<string, int> brandCount;
     for (const auto& car : carDatabase) {
