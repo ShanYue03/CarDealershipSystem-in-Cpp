@@ -6,6 +6,7 @@
 #include <sstream>
 #include <random>
 #include <algorithm>
+#include <ctime> 
 
 using namespace std;
 
@@ -369,15 +370,15 @@ int main() {
             }
 
             int menuChoice = 0;
-            while (menuChoice != 15) {
+            while (menuChoice != 13) {
                 cout << "----------------------------------" << endl;
                 cout << "\t  Option to Choose" << endl;
                 cout << "----------------------------------" << endl;
                 cout << "1. Add a new car\n2. Modify car data\n3. Display all cars\n4. Sort cars by brand\n";
                 cout << "5. Sort cars by price\n6. Sort cars by ID\n7. Sort cars by best-selling brand\n";
-                cout << "8. Search car by ID\n9. Linear search by brand\n10. Binary search by brand\n";
-                cout << "11. Search best-selling brand\n12. Track number of cars sold\n13. Remove car record\n";
-                cout << "14. Check stock\n15. Exit\nEnter your choice: ";
+                cout << "8. Search car by ID\n9. Search best-selling brand\n10. Track number of cars sold\n";
+                cout << "11. Remove car record\n12. Check stock\n13. Exit\n";
+                cout << "Enter your choice: ";
                 cin >> menuChoice;
 
                 switch (menuChoice) {
@@ -406,34 +407,18 @@ int main() {
                         searchCarByID();
                         break;
                     case 9:
-                        {
-                            string brand;
-                            cout << "Enter brand to search: ";
-                            cin >> brand;
-                            linearSearch(carDatabase, brand);
-                        }
-                        break;
-                    case 10:
-                        {
-                            string brand;
-                            cout << "Enter brand to search: ";
-                            cin >> brand;
-                            binarySearch(carDatabase, brand);
-                        }
-                        break;
-                    case 11:
                         searchBestSellingBrand();
                         break;
-                    case 12:
+                    case 10:
                         trackNumberOfCarsSold();
                         break;
-                    case 13:
+                    case 11:
                         removeCarRecord();
                         break;
-                    case 14:
+                    case 12:
                         checkStock();
                         break;
-                    case 15:
+                    case 13:
                         break;
                     default:
                         cout << "Invalid choice." << endl;
