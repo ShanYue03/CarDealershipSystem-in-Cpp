@@ -135,10 +135,12 @@ void addCar() {
     carDatabase.push_back(newCar);
     saveCarDatabase();
 
+    loadCarDatabase("CarsBeforeSorted.txt");
+    carDatabase.push_back(newCar);
     ofstream outFileBeforeSorted("CarsBeforeSorted.txt");
-    if (outFileBeforeSorted.is_open()) {
-        for (const auto& car : carDatabase) {
-            // Save to CarsBeforeSorted.txt
+    if(outFileBeforeSorted.is_open()){
+        for (const auto& car : carDatabase){
+            //save to CarBeforeSorted.txt
             outFileBeforeSorted << car.id << ","
                           << car.brand << ","
                           << car.color << ","
@@ -152,7 +154,7 @@ void addCar() {
     }
 
     cout << "Car added successfully with ID: " << newCar.id << endl;
-}
+)
 
 void modifyCarData(){
     loadCarDatabase("CarsSorted.txt");
