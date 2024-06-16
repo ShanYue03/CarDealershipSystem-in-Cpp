@@ -440,30 +440,74 @@ void searchCarByID() {
     }
 }
 
+
 // Search Best Selling Brand using Binary Search
 void searchBestSellingBrand() {
     loadCarDatabase("CarsSold.txt");
 
+    // Sort carDatabase by brand to enable binary search (backup)
     sort(carDatabase.begin(), carDatabase.end(), [](const Car& a, const Car& b) {
         return a.brand < b.brand;
     });
 
     map<string, int> brandCount;
     for (const auto& car : carDatabase) {
-        if (brandCount.find(car.brand) == brandCount.end()) {
-            int index = binarySearch(carDatabase, car.brand);
-            if (index != -1) {
-                int count = 0;
-                for (size_t i = index; i < carDatabase.size() && carDatabase[i].brand == car.brand; ++i) {
-                    ++count;
-                }
-                brandCount[car.brand] = count;
+        brandCount[car.brand] = 0; // Initialize brand counts to zero
+    }
+
+    // Function to perform binary search and find the first occurrence of a brand
+    auto binarySearchFirstOccurrence = [](const vector<Car>& cars, const string& brand) {
+        int left = 0;
+        int right = cars.size() - 1;
+        int result = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (cars[mid].brand == brand) {
+                result = mid;
+                right = mid - 1; // Look on the left side
+            } else if (cars[mid].brand < brand) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    };
+
+    // Function to perform binary search and find the last occurrence of a brand
+    auto binarySearchLastOccurrence = [](const vector<Car>& cars, const string& brand) {
+        int left = 0;
+        int right = cars.size() - 1;
+        int result = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (cars[mid].brand == brand) {
+                result = mid;
+                left = mid + 1; // Look on the right side
+            } else if (cars[mid].brand < brand) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    };
+
+    // Count the occurrences of each brand using binary search
+    for (const auto& car : carDatabase) {
+        if (brandCount[car.brand] == 0) { // If not already counted
+            int first = binarySearchFirstOccurrence(carDatabase, car.brand);
+            int last = binarySearchLastOccurrence(carDatabase, car.brand);
+            if (first != -1 && last != -1) {
+                brandCount[car.brand] = last - first + 1;
             }
         }
     }
 
+    // Find the best-selling brand
     string bestSellingBrand;
     int maxCount = 0;
+
     for (const auto& entry : brandCount) {
         if (entry.second > maxCount) {
             bestSellingBrand = entry.first;
@@ -477,6 +521,7 @@ void searchBestSellingBrand() {
         cout << "No cars in the database." << endl;
     }
 }
+
 
 void sellCar(const string& carID) {
     // Load current car data
@@ -559,7 +604,7 @@ int main() {
             }
 
             int menuChoice = 0;
-            while (menuChoice != 18) {
+            while (menuChoice != 16) {
                 cout << "----------------------------------" << endl;
                 cout << "\t  Option to Choose" << endl;
                 cout << "----------------------------------" << endl;
