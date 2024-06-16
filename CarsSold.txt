@@ -1,0 +1,10 @@
+Hon1005794,Honda,Red,Mexico,2001,85000
+Hon1005794,Honda,Red,Mexico,2001,85000
+Hon1005794,Honda,Red,Mexico,2001,85000
+Hon1005794,Honda,Red,Mexico,2001,85000
+Por1001843,Porsche,White,Germany,2012,170000
+Por1001395,Porsche,Red,Germany,2020,50000
+Por1025960,Porsche,Red,Germany,2020,57000
+Tes1001835,Tesla,White,USA,2020,120000
+Tes1026735,Tesla,Grey,USA,2020,150000
+Pro1009619,Proton,White,Malaysia,2012,78000
