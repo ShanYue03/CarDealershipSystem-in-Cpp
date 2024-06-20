@@ -1,0 +1,880 @@
+#include <iostream>
+#include <map>
+#include <string>
+#include <fstream>
+#include <vector>
+#include <sstream>
+#include <random>
+#include <algorithm>
+#include <ctime>
+#include <iomanip> // Include this header for setfill and setw
+
+using namespace std;
+
+const string FILENAME = "users.txt";
+
+// Function prototypes
+void saveUsersToFile(const map<string, string>& users);
+void loadUsersFromFile(map<string, string>& users);
+void addNewUser(map<string, string>& users);
+bool authenticateUser(const map<string, string>& users, const string& id, const string& password);
+
+void saveUsersToFile(const map<string, string>& users) {
+    ofstream outfile(FILENAME);
+    if (outfile.is_open()) {
+        for (const auto& user : users) {
+            outfile << user.first << " " << user.second << endl;
+        }
+        outfile.close();
+    } else {
+        cerr << "Unable to open file for writing." << endl;
+    }
+}
+
+void loadUsersFromFile(map<string, string>& users) {
+    ifstream infile(FILENAME);
+    if (infile.is_open()) {
+        string id, password;
+        while (infile >> id >> password) {
+            users[id] = password;
+        }
+        infile.close();
+    } else {
+        cerr << "No user file found. Starting with an empty user list." << endl;
+    }
+}
+
+void addNewUser(map<string, string>& users) {
+    string id, password;
+    cout << "Enter new user ID: ";
+    cin >> id;
+    cout << "Enter new user password: ";
+    cin >> password;
+    users[id] = password;
+}
+
+bool authenticateUser(const map<string, string>& users, const string& id, const string& password) {
+    auto it = users.find(id);
+    if (it != users.end() && it->second == password) {
+        return true;
+    }
+    return false;
+}
+
+struct Car {
+    string id;
+    string brand;
+    string color;
+    string countryOfManufacture;
+    int yearOfManufacture;
+    double price;
+};
+
+struct Bill {
+    string purchaseOrderNumber;
+    string customerID;
+    string date;
+    vector<Car> purchasedCars;
+    double totalPrice;
+};
+
+vector<Car> carDatabase;
+vector<Bill> billDatabase;
+
+string generateCarID(const string& brand) {
+    string id = brand.substr(0, 3);
+    id += to_string(rand() % 1000000 + 1000000);
+    return id;
+}
+
+string generatePurchaseOrderNumber() {
+    static int counter = 1;
+    stringstream ss;
+    ss << "PO" << setfill('0') << setw(6) << counter++;
+    return ss.str();
+}
+
+double calculateTotalPrice(const vector<Car>& cars) {
+    double total = 0;
+    for (const auto& car : cars) {
+        total += car.price;
+    }
+    return total;
+}
+
+void saveCarDatabase() {
+    ofstream outFileSorted("CarsSorted.txt");
+
+    if (outFileSorted.is_open()) {
+        for (const auto& car : carDatabase) {
+            // Save to CarsSorted.txt
+            outFileSorted << car.id << ","
+                          << car.brand << ","
+                          << car.color << ","
+                          << car.countryOfManufacture << ","
+                          << car.yearOfManufacture << ","
+                          << car.price << endl;
+        }
+        outFileSorted.close();
+    } else {
+        cerr << "Unable to open file for writing." << endl;
+    }
+}
+
+void saveBillDatabase() {
+    ofstream outFile("Bills.txt");
+
+    if (outFile.is_open()) {
+        for (const auto& bill : billDatabase) {
+            outFile << bill.purchaseOrderNumber << ","
+                    << bill.customerID << ","
+                    << bill.date << ","
+                    << bill.totalPrice << endl;
+            for (const auto& car : bill.purchasedCars) {
+                outFile << car.id << ","
+                        << car.brand << ","
+                        << car.color << ","
+                        << car.countryOfManufacture << ","
+                        << car.yearOfManufacture << ","
+                        << car.price << endl;
+            }
+            outFile << "---" << endl;
+        }
+        outFile.close();
+    } else {
+        cerr << "Unable to open file for writing." << endl;
+    }
+}
+
+void loadCarDatabase(const string& filename) {
+    ifstream inFile(filename);
+    string line;
+    carDatabase.clear();
+    while (getline(inFile, line)) {
+        istringstream ss(line);
+        Car car;
+        string year, price;
+        getline(ss, car.id, ',');
+        getline(ss, car.brand, ',');
+        getline(ss, car.color, ',');
+        getline(ss, car.countryOfManufacture, ',');
+        getline(ss, year, ',');
+        getline(ss, price, ',');
+        car.yearOfManufacture = stoi(year);
+        car.price = stod(price);
+        carDatabase.push_back(car);
+    }
+    inFile.close();
+}
+
+void loadBillDatabase() {
+    ifstream inFile("Bills.txt");
+    string line;
+    billDatabase.clear();
+    while (getline(inFile, line)) {
+        if (line == "---") continue;
+        istringstream ss(line);
+        Bill bill;
+        string totalPrice;
+        getline(ss, bill.purchaseOrderNumber, ',');
+        getline(ss, bill.customerID, ',');
+        getline(ss, bill.date, ',');
+        getline(ss, totalPrice, ',');
+        bill.totalPrice = stod(totalPrice);
+
+        while (getline(inFile, line) && line != "---") {
+            istringstream carStream(line);
+            Car car;
+            string year, price;
+            getline(carStream, car.id, ',');
+            getline(carStream, car.brand, ',');
+            getline(carStream, car.color, ',');
+            getline(carStream, car.countryOfManufacture, ',');
+            getline(carStream, year, ',');
+            getline(carStream, price, ',');
+            car.yearOfManufacture = stoi(year);
+            car.price = stod(price);
+            bill.purchasedCars.push_back(car);
+        }
+        billDatabase.push_back(bill);
+    }
+    inFile.close();
+}
+
+void addCar() {
+    loadCarDatabase("CarsSorted.txt");
+    Car newCar;
+    cout << "Enter car brand: ";
+    cin >> newCar.brand;
+    cout << "Enter car color: ";
+    cin >> newCar.color;
+    cout << "Enter country of manufacture: ";
+    cin >> newCar.countryOfManufacture;
+    cout << "Enter year of manufacture: ";
+    cin >> newCar.yearOfManufacture;
+    cout << "Enter car price: RM";
+    cin >> newCar.price;
+    newCar.id = generateCarID(newCar.brand);
+    carDatabase.push_back(newCar);
+    saveCarDatabase();
+
+    loadCarDatabase("CarsBeforeSorted.txt");
+    carDatabase.push_back(newCar);
+    ofstream outFileBeforeSorted("CarsBeforeSorted.txt");
+    if (outFileBeforeSorted.is_open()) {
+        for (const auto& car : carDatabase) {
+            // save to CarBeforeSorted.txt
+            outFileBeforeSorted << car.id << ","
+                                << car.brand << ","
+                                << car.color << ","
+                                << car.countryOfManufacture << ","
+                                << car.yearOfManufacture << ","
+                                << car.price << endl;
+        }
+        outFileBeforeSorted.close();
+    } else {
+        cerr << "Unable to open file CarsBeforeSorted.txt for writing." << endl;
+    }
+
+    cout << "Car added successfully with ID: " << newCar.id << endl;
+}
+
+void modifyCarData() {
+    loadCarDatabase("CarsSorted.txt");
+    string carID;
+    cout << "Enter the car ID to modify: ";
+    cin >> carID;
+    for (auto& car : carDatabase) {
+        if (car.id == carID) {
+            cout << "Enter new car brand: ";
+            cin >> car.brand;
+            cout << "Enter new car color: ";
+            cin >> car.color;
+            cout << "Enter new country of manufacture: ";
+            cin >> car.countryOfManufacture;
+            cout << "Enter new year of manufacture: ";
+            cin >> car.yearOfManufacture;
+            cout << "Enter new car price: RM";
+            cin >> car.price;
+            saveCarDatabase();
+            cout << "Car data updated successfully." << endl;
+            return;
+        }
+    }
+    cout << "Car ID not found." << endl;
+}
+
+void displayAllCars() {
+    loadCarDatabase("CarsSorted.txt");
+    for (const auto& car : carDatabase) {
+        cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color
+             << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: "
+             << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+    }
+}
+
+void displaySoldCars() {
+    loadCarDatabase("CarsSold.txt");
+    for (const auto& car : carDatabase) {
+        cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color
+             << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: "
+             << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+    }
+}
+
+void displayCarsBeforeSorted() {
+    ifstream inFile("CarsBeforeSorted.txt");
+    string line;
+    cout << "Cars before sorting:" << endl;
+    while (getline(inFile, line)) {
+        istringstream ss(line);
+        Car car;
+        string year, price;
+        getline(ss, car.id, ',');
+        getline(ss, car.brand, ',');
+        getline(ss, car.color, ',');
+        getline(ss, car.countryOfManufacture, ',');
+        getline(ss, year, ',');
+        getline(ss, price, ',');
+        car.yearOfManufacture = stoi(year);
+        car.price = stod(price);
+        cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color
+             << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: "
+             << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+    }
+    inFile.close();
+}
+
+void displayCarsSold() {
+    ifstream inFile("CarsSold.txt");
+    string line;
+    cout << "Cars sold:" << endl;
+    while (getline(inFile, line)) {
+        istringstream ss(line);
+        Car car;
+        string year, price;
+        getline(ss, car.id, ',');
+        getline(ss, car.brand, ',');
+        getline(ss, car.color, ',');
+        getline(ss, car.countryOfManufacture, ',');
+        getline(ss, year, ',');
+        getline(ss, price, ',');
+        car.yearOfManufacture = stoi(year);
+        car.price = stod(price);
+        cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color
+             << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: "
+             << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+    }
+    inFile.close();
+}
+
+bool compareByBrand(const Car& a, const Car& b) {
+    return a.brand < b.brand;
+}
+
+bool compareByPrice(const Car& a, const Car& b) {
+    return a.price < b.price;
+}
+
+bool compareByID(const Car& a, const Car& b) {
+    return a.id < b.id;
+}
+
+template<typename T, typename Compare>
+int partition(vector<T>& arr, int low, int high, Compare comp) {
+    T pivot = arr[high];
+    int i = low - 1;
+
+    for (int j = low; j < high; j++) {
+        if (comp(arr[j], pivot)) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+template<typename T, typename Compare>
+void quicksort(vector<T>& arr, int low, int high, Compare comp) {
+    if (low < high) {
+        int pi = partition(arr, low, high, comp);
+
+        quicksort(arr, low, pi - 1, comp);
+        quicksort(arr, pi + 1, high, comp);
+    }
+}
+
+void sortByBrand() {
+    // Display in alphabetical order (A-Z)
+    loadCarDatabase("CarsSorted.txt");
+    quicksort(carDatabase, 0, carDatabase.size() - 1, compareByBrand);
+    saveCarDatabase();
+    cout << "Cars sorted by brand." << endl;
+}
+
+void sortByPrice() {
+    // Ascending from top to bottom
+    loadCarDatabase("CarsSorted.txt");
+    quicksort(carDatabase, 0, carDatabase.size() - 1, compareByPrice);
+    saveCarDatabase();
+    cout << "Cars sorted by price." << endl;
+}
+
+void sortByID() {
+    // Display in alphabetical order (A-Z), if the brands are the same, sort in ascending order by considering the last few digits of the ID
+    loadCarDatabase("CarsSorted.txt");
+    quicksort(carDatabase, 0, carDatabase.size() - 1, compareByID);
+    saveCarDatabase();
+    cout << "Cars sorted by ID." << endl;
+}
+
+template<typename T, typename Compare>
+void bubbleSort(vector<T>& arr, Compare comp) {
+    bool swapped;
+    for (size_t i = 0; i < arr.size() - 1; i++) {
+        swapped = false;
+        for (size_t j = 0; j < arr.size() - i - 1; j++) {
+            if (comp(arr[j + 1], arr[j])) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped)
+            break;
+    }
+}
+
+void sortByBestSellingBrand() {
+    // Display the number of car brands in descending order
+    loadCarDatabase("CarsSold.txt");
+    map<string, int> brandCount;
+    for (const auto& car : carDatabase) {
+        brandCount[car.brand]++;
+    }
+
+    bubbleSort(carDatabase, [&brandCount](const Car& a, const Car& b) {
+        return brandCount[a.brand] < brandCount[b.brand];
+    });
+
+    // Sort the car database based on the brand count in descending order
+    bubbleSort(carDatabase, [&brandCount](const Car& a, const Car& b) {
+        return brandCount[a.brand] > brandCount[b.brand];
+    });
+
+    // Optionally, save the sorted data back to "CarsSold.txt"
+    ofstream outFileSold("CarsSold.txt");
+    if (outFileSold.is_open()) {
+        for (const auto& car : carDatabase) {
+            outFileSold << car.id << ","
+                        << car.brand << ","
+                        << car.color << ","
+                        << car.countryOfManufacture << ","
+                        << car.yearOfManufacture << ","
+                        << car.price << endl;
+        }
+        outFileSold.close();
+    } else {
+        cerr << "Unable to open CarsSold.txt for writing." << endl;
+    }
+
+    cout << "Cars sorted by best-selling brand." << endl;
+}
+
+// Function to track and display the number of cars sold
+void trackNumberOfCarsSold() {
+    loadCarDatabase("CarsSold.txt");
+    cout << "Total number of cars sold: " << carDatabase.size() << endl;
+}
+
+// Function to remove a car record based on the car ID
+void removeCarRecord(const string& filename, const string& carID) {
+    ifstream inFile(filename);
+    ofstream tempFile("temp.txt");
+
+    if (inFile.is_open() && tempFile.is_open()) {
+        string line;
+        while (getline(inFile, line)) {
+            istringstream ss(line);
+            string currentCarID;
+            getline(ss, currentCarID, ',');
+            if (currentCarID != carID) {
+                tempFile << line << endl;
+            }
+        }
+        inFile.close();
+        tempFile.close();
+        remove(filename.c_str());        // Delete the original file
+        rename("temp.txt", filename.c_str());  // Rename the temporary file to the original file name
+    } else {
+        cerr << "Unable to open file for reading or writing." << endl;
+    }
+}
+
+// Function to check and display the current stock of cars
+void checkStock() {
+    loadCarDatabase("CarsSorted.txt");
+    cout << "Total cars in stock: " << carDatabase.size() << endl;
+}
+
+// Linear Search Function
+int linearSearch(const vector<Car>& cars, const string& id) {
+    for (size_t i = 0; i < cars.size(); ++i) {
+        if (cars[i].id == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Binary Search Function
+int binarySearch(const vector<Car>& cars, const string& brand) {
+    int left = 0;
+    int right = cars.size() - 1;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (cars[mid].brand == brand) {
+            return mid; // return index
+        } else if (cars[mid].brand < brand) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return -1; // no find return -1
+}
+
+// Search Car By ID using Linear Search
+void searchCarByID() {
+    string carID;
+    cout << "Enter the car ID to search: ";
+    cin >> carID;
+    int index = linearSearch(carDatabase, carID);
+    if (index != -1) {
+        const auto& car = carDatabase[index];
+        cout << "Car found: ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color
+             << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: "
+             << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+    } else {
+        cout << "Car ID not found." << endl;
+    }
+}
+
+// Search Best Selling Brand using Binary Search
+void searchBestSellingBrand() {
+    loadCarDatabase("CarsSold.txt");
+
+    // Sort carDatabase by brand to enable binary search (backup)
+    sort(carDatabase.begin(), carDatabase.end(), [](const Car& a, const Car& b) {
+        return a.brand < b.brand;
+    });
+
+    map<string, int> brandCount;
+    for (const auto& car : carDatabase) {
+        brandCount[car.brand] = 0; // Initialize brand counts to zero
+    }
+
+    // Function to perform binary search and find the first occurrence of a brand
+    auto binarySearchFirstOccurrence = [](const vector<Car>& cars, const string& brand) {
+        int left = 0;
+        int right = cars.size() - 1;
+        int result = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (cars[mid].brand == brand) {
+                result = mid;
+                right = mid - 1; // Look on the left side
+            } else if (cars[mid].brand < brand) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    };
+
+    // Function to perform binary search and find the last occurrence of a brand
+    auto binarySearchLastOccurrence = [](const vector<Car>& cars, const string& brand) {
+        int left = 0;
+        int right = cars.size() - 1;
+        int result = -1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (cars[mid].brand == brand) {
+                result = mid;
+                left = mid + 1; // Look on the right side
+            } else if (cars[mid].brand < brand) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    };
+
+    // Count the occurrences of each brand using binary search
+    for (const auto& car : carDatabase) {
+        if (brandCount[car.brand] == 0) { // If not already counted
+            int first = binarySearchFirstOccurrence(carDatabase, car.brand);
+            int last = binarySearchLastOccurrence(carDatabase, car.brand);
+            if (first != -1 && last != -1) {
+                brandCount[car.brand] = last - first + 1;
+            }
+        }
+    }
+
+    // Find the best-selling brand
+    string bestSellingBrand;
+    int maxCount = 0;
+
+    for (const auto& entry : brandCount) {
+        if (entry.second > maxCount) {
+            bestSellingBrand = entry.first;
+            maxCount = entry.second;
+        }
+    }
+
+    if (!bestSellingBrand.empty()) {
+        cout << "Best-selling brand: " << bestSellingBrand << " with " << maxCount << " cars sold." << endl;
+    } else {
+        cout << "No cars in the database." << endl;
+    }
+}
+
+void sellCar(const string& carID) {
+    // Load current car data
+    loadCarDatabase("CarsSorted.txt");
+
+    auto it = find_if(carDatabase.begin(), carDatabase.end(), [&carID](const Car& car) {
+        return car.id == carID;
+    });
+
+    if (it != carDatabase.end()) {
+        // Save the car to be sold
+        Car soldCar = *it;
+
+        // Erase the car from the in-memory database
+        carDatabase.erase(it);
+
+        // Remove the car from CarsBeforeSorted.txt and CarsSorted.txt
+        removeCarRecord("CarsBeforeSorted.txt", carID);
+        removeCarRecord("CarsSorted.txt", carID);
+
+        // Add the car to CarsSold.txt
+        ofstream outFileSold("CarsSold.txt", ios::app);
+        if (outFileSold.is_open()) {
+            outFileSold << soldCar.id << ","
+                        << soldCar.brand << ","
+                        << soldCar.color << ","
+                        << soldCar.countryOfManufacture << ","
+                        << soldCar.yearOfManufacture << ","
+                        << soldCar.price << endl;
+            outFileSold.close();
+            cout << "Car with ID " << soldCar.id << " sold successfully." << endl;
+        } else {
+            cerr << "Unable to open file for writing." << endl;
+        }
+
+        // Save the updated car database to CarsSorted.txt
+        saveCarDatabase();
+    } else {
+        cout << "Car with ID " << carID << " not found in inventory." << endl;
+    }
+}
+
+// New functions for generating and managing bills
+void generateBill() {
+    Bill newBill;
+    cout << "Enter customer ID: ";
+    cin >> newBill.customerID;
+    cout << "Enter date (YYYY-MM-DD): ";
+    cin >> newBill.date;
+
+    string carID;
+    cout << "Enter car IDs to purchase (enter 'done' to finish):" << endl;
+    while (true) {
+        cin >> carID;
+        if (carID == "done") break;
+        int index = linearSearch(carDatabase, carID);
+        if (index != -1) {
+            newBill.purchasedCars.push_back(carDatabase[index]);
+        } else {
+            cout << "Car ID " << carID << " not found." << endl;
+        }
+    }
+
+    newBill.purchaseOrderNumber = generatePurchaseOrderNumber();
+    newBill.totalPrice = calculateTotalPrice(newBill.purchasedCars);
+    billDatabase.push_back(newBill);
+    saveBillDatabase();
+    cout << "Bill generated successfully with Purchase Order Number: " << newBill.purchaseOrderNumber << endl;
+}
+
+void searchByCustomerID(const string& customerID) {
+    loadBillDatabase();
+    for (const auto& bill : billDatabase) {
+        if (bill.customerID == customerID) {
+            cout << "Purchase Order Number: " << bill.purchaseOrderNumber << ", Date: " << bill.date << ", Total Price: RM" << bill.totalPrice << endl;
+            for (const auto& car : bill.purchasedCars) {
+                cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: " << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+            }
+            cout << "----------------------------------------" << endl;
+        }
+    }
+}
+
+void searchByBillDate(const string& date) {
+    loadBillDatabase();
+    for (const auto& bill : billDatabase) {
+        if (bill.date == date) {
+            cout << "Purchase Order Number: " << bill.purchaseOrderNumber << ", Customer ID: " << bill.customerID << ", Total Price: RM" << bill.totalPrice << endl;
+            for (const auto& car : bill.purchasedCars) {
+                cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: " << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+            }
+            cout << "----------------------------------------" << endl;
+        }
+    }
+}
+
+void compileList(const string& startDate, const string& endDate, vector<Bill>& compiledList) {
+    loadBillDatabase();
+    for (const auto& bill : billDatabase) {
+        if (bill.date >= startDate && bill.date <= endDate) {
+            compiledList.push_back(bill);
+        }
+    }
+}
+
+void generateReport(const string& startDate, const string& endDate) {
+    vector<Bill> compiledList;
+    compileList(startDate, endDate, compiledList);
+    quicksort(compiledList, 0, compiledList.size() - 1, [](const Bill& a, const Bill& b) {
+        return a.totalPrice < b.totalPrice;
+    });
+    for (const auto& bill : compiledList) {
+        cout << "Purchase Order Number: " << bill.purchaseOrderNumber << ", Customer ID: " << bill.customerID << ", Date: " << bill.date << ", Total Price: RM" << bill.totalPrice << endl;
+        for (const auto& car : bill.purchasedCars) {
+            cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: " << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+        }
+        cout << "----------------------------------------" << endl;
+    }
+}
+
+int main() {
+    srand(time(0));
+    map<string, string> users;
+
+    loadUsersFromFile(users);
+
+    int choice;
+
+    do {
+        cout << "----------------------------------" << endl;
+        cout << "\t     Welcome" << endl;
+        cout << "----------------------------------" << endl;
+        cout << "1. Login\n2. Register\n3. Exit\nEnter your choice: ";
+        cin >> choice;
+
+        if (choice == 3) {
+            cout << "See you!";
+            break;
+        }
+
+        if (choice == 1) {
+            bool identified = false;
+            while (!identified) {
+                string id, password;
+                cout << "Enter your ID: ";
+                cin >> id;
+                cout << "Enter your password: ";
+                cin >> password;
+
+                if (authenticateUser(users, id, password)) {
+                    cout << "Authentication successful. Welcome!" << endl;
+                    identified = true;
+                } else {
+                    cout << "\nInvalid ID or password." << endl;
+                }
+            }
+
+            int menuChoice = 0;
+            while (menuChoice != 20) {
+                cout << "----------------------------------" << endl;
+                cout << "\t  Option to Choose" << endl;
+                cout << "----------------------------------" << endl;
+                cout << "1.  Add a new car\n2.  Modify car data\n3.  Display all cars\n4.  Sort cars by brand\n";
+                cout << "5.  Sort cars by price\n6.  Sort cars by ID\n7.  Display cars before sorting.\n";
+                cout << "8.  Search car by ID\n9.  Sell car\n";
+                cout << "10. Sort cars by best-selling brand\n11. Search best-selling brand\n12. Display cars sold.\n";
+                cout << "13. Track number of cars sold\n14. Remove car record\n15. Check stock\n16. Generate bill\n";
+                cout << "17. Search bills by customer ID\n18. Search bills by date\n19. Generate report\n20. Exit\n";
+                cout << "Enter your choice: ";
+                cin >> menuChoice;
+
+                switch (menuChoice) {
+                    case 1:
+                        addCar();
+                        break;
+                    case 2:
+                        modifyCarData();
+                        break;
+                    case 3:
+                        displayAllCars();
+                        break;
+                    case 4:
+                        sortByBrand();
+                        break;
+                    case 5:
+                        sortByPrice();
+                        break;
+                    case 6:
+                        sortByID();
+                        break;
+                    case 7:
+                        displayCarsBeforeSorted();
+                        break;
+                    case 8:
+                        searchCarByID();
+                        break;
+                    case 9:
+                        {
+                            string carID;
+                            cout << "Enter car ID to sell: ";
+                            cin >> carID;
+                            sellCar(carID);
+                            break;
+                        }
+                    case 10:
+                        sortByBestSellingBrand();
+                        break;
+                    case 11:
+                        searchBestSellingBrand();
+                        break;
+                    case 12:
+                        displayCarsSold();
+                        break;
+                    case 13:
+                        trackNumberOfCarsSold();
+                        break;
+                    case 14:
+                        {
+                            string carID;
+                            cout << "Enter the car ID to remove: ";
+                            cin >> carID;
+                            removeCarRecord("CarsBeforeSorted.txt", carID);
+                            removeCarRecord("CarsSorted.txt", carID);
+                            break;
+                        }
+                    case 15:
+                        checkStock();
+                        break;
+                    case 16:
+                        generateBill();
+                        break;
+                    case 17:
+                        {
+                            string customerID;
+                            cout << "Enter customer ID to search: ";
+                            cin >> customerID;
+                            searchByCustomerID(customerID);
+                            break;
+                        }
+                    case 18:
+                        {
+                            string date;
+                            cout << "Enter date to search (YYYY-MM-DD): ";
+                            cin >> date;
+                            searchByBillDate(date);
+                            break;
+                        }
+                    case 19:
+                        {
+                            string startDate, endDate;
+                            cout << "Enter start date (YYYY-MM-DD): ";
+                            cin >> startDate;
+                            cout << "Enter end date (YYYY-MM-DD): ";
+                            cin >> endDate;
+                            generateReport(startDate, endDate);
+                            break;
+                        }
+                    case 20:
+                        break;
+
+                    default:
+                        cout << "Invalid choice." << endl;
+                        break;
+                }
+            }
+            cout << "\nThank you and Goodbye!" << endl;
+        } else if (choice == 2) {
+            addNewUser(users);
+            saveUsersToFile(users);
+            cout << "New user registered successfully." << endl;
+        } else {
+            cout << "Invalid choice." << endl;
+        }
+    } while (choice != 3);
+
+    return 0;
+}
