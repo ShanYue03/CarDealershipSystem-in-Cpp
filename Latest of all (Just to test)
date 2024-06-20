@@ -7,7 +7,7 @@
 #include <random>
 #include <algorithm>
 #include <ctime>
-#include <iomanip>
+#include <iomanip> // Include this header for setfill and setw
 
 using namespace std;
 
@@ -202,12 +202,13 @@ void loadBillDatabase() {
 }
 
 void addCar() {
-    loadCarDatabase("CarsSorted.txt");
-    int numberOfCars;
-    Car newCar;
+    int numCars;
+    cout << "Enter the number of cars to add: ";
+    cin >> numCars;
 
-    cout << "Enter number of cars to add: ";
-    cin >> numberOfCars;
+    loadCarDatabase("CarsSorted.txt");
+
+    Car newCar;
     cout << "Enter car brand: ";
     cin >> newCar.brand;
     cout << "Enter car color: ";
@@ -219,19 +220,18 @@ void addCar() {
     cout << "Enter car price: RM";
     cin >> newCar.price;
 
-    for (int i = 0; i < numberOfCars; ++i) {
-        Car car = newCar;
-        car.id = generateCarID(newCar.brand);
-        carDatabase.push_back(car);
+    for (int i = 0; i < numCars; ++i) {
+        newCar.id = generateCarID(newCar.brand);
+        carDatabase.push_back(newCar);
     }
+    
     saveCarDatabase();
 
     loadCarDatabase("CarsBeforeSorted.txt");
-    for (int i = 0; i < numberOfCars; ++i) {
-        Car car = newCar;
-        car.id = generateCarID(newCar.brand);
-        carDatabase.push_back(car);
+    for (int i = 0; i < numCars; ++i) {
+        carDatabase.push_back(newCar);
     }
+
     ofstream outFileBeforeSorted("CarsBeforeSorted.txt");
     if (outFileBeforeSorted.is_open()) {
         for (const auto& car : carDatabase) {
@@ -248,7 +248,7 @@ void addCar() {
         cerr << "Unable to open file CarsBeforeSorted.txt for writing." << endl;
     }
 
-    cout << numberOfCars << " cars added successfully." << endl;
+    cout << numCars << " cars added successfully." << endl;
 }
 
 void modifyCarData() {
@@ -317,6 +317,29 @@ void displayCarsBeforeSorted() {
     inFile.close();
 }
 
+void displayCarsSold() {
+    ifstream inFile("CarsSold.txt");
+    string line;
+    cout << "Cars sold:" << endl;
+    while (getline(inFile, line)) {
+        istringstream ss(line);
+        Car car;
+        string year, price;
+        getline(ss, car.id, ',');
+        getline(ss, car.brand, ',');
+        getline(ss, car.color, ',');
+        getline(ss, car.countryOfManufacture, ',');
+        getline(ss, year, ',');
+        getline(ss, price, ',');
+        car.yearOfManufacture = stoi(year);
+        car.price = stod(price);
+        cout << "ID: " << car.id << ", Brand: " << car.brand << ", Color: " << car.color
+             << ", Country of Manufacture: " << car.countryOfManufacture << ", Year: "
+             << car.yearOfManufacture << ", Price: RM" << car.price << endl;
+    }
+    inFile.close();
+}
+
 bool compareByBrand(const Car& a, const Car& b) {
     return a.brand < b.brand;
 }
@@ -348,6 +371,7 @@ template<typename T, typename Compare>
 void quicksort(vector<T>& arr, int low, int high, Compare comp) {
     if (low < high) {
         int pi = partition(arr, low, high, comp);
+
         quicksort(arr, low, pi - 1, comp);
         quicksort(arr, pi + 1, high, comp);
     }
@@ -633,6 +657,7 @@ void sellCar(const string& carID) {
 
 // New functions for generating and managing bills
 void generateBill() {
+    loadCarDatabase("CarsSold.txt");
     Bill newBill;
     cout << "Enter customer ID: ";
     cin >> newBill.customerID;
@@ -640,7 +665,7 @@ void generateBill() {
     cin >> newBill.date;
 
     string carID;
-    cout << "Enter car IDs to purchase (enter 'done' to finish):" << endl;
+    cout << "Enter car ID(s) of the car(s) purchased (enter 'done' to finish):" << endl;
     while (true) {
         cin >> carID;
         if (carID == "done") break;
@@ -800,7 +825,7 @@ int main() {
                                 searchBestSellingBrand();
                                 break;
                             case 12:
-                                displaySoldCars();
+                                displayCarsSold();
                                 break;
                             case 13:
                                 trackNumberOfCarsSold();
