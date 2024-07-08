@@ -206,8 +206,11 @@ void addCar() {
     cout << "Enter the number of cars to add: ";
     cin >> numCars;
 
+    // Load existing car databases.
     loadCarDatabase("CarsSorted.txt");
+    loadCarDatabase("CarsBeforeSorted.txt");
 
+    // Read car details once.
     Car newCar;
     cout << "Enter car brand: ";
     cin >> newCar.brand;
@@ -220,22 +223,19 @@ void addCar() {
     cout << "Enter car price: RM";
     cin >> newCar.price;
 
+    // Generate and add cars.
     for (int i = 0; i < numCars; ++i) {
-        newCar.id = generateCarID(newCar.brand);
+        newCar.id = generateCarID(newCar.brand);  // Generate a unique ID for each car
         carDatabase.push_back(newCar);
     }
-    
+
+    // Save all cars to "CarsSorted.txt"
     saveCarDatabase();
 
-    loadCarDatabase("CarsBeforeSorted.txt");
-    for (int i = 0; i < numCars; ++i) {
-        carDatabase.push_back(newCar);
-    }
-
+    // Save all cars to "CarsBeforeSorted.txt"
     ofstream outFileBeforeSorted("CarsBeforeSorted.txt");
     if (outFileBeforeSorted.is_open()) {
         for (const auto& car : carDatabase) {
-            // save to CarBeforeSorted.txt
             outFileBeforeSorted << car.id << ","
                                 << car.brand << ","
                                 << car.color << ","
@@ -892,3 +892,4 @@ int main() {
 
     return 0;
 }
+
