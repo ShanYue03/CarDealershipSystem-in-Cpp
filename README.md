@@ -31,6 +31,7 @@ $${\color{blue}3: Display and Sorting}$$
 -	sortByID: Sort cars by ID.
 -	sortByBestSellingBrand: Sort best selling cars
 3.  sellCar() function
+
  
 $${\color{blue}4: Searching and Tracking}$$
 •	Task: Implementing search functionalities and tracking the number of cars sold.
